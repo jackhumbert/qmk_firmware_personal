@@ -25,9 +25,18 @@ typedef struct is31_led {
 	uint8_t driver;
 	uint8_t matrix;
 	uint8_t control_index;
+	union {
+		uint8_t raw;
+		struct {
+			uint8_t row:4;
+			uint8_t col:4;
+		};
+	} matrix_co;
 } is31_led;
 
 extern const is31_led g_is31_leds[DRIVER_LED_TOTAL];
+
+void map_index_to_led( uint8_t index, is31_led *led );
 
 void IS31FL3731_init( uint8_t addr );
 void IS31FL3731_write_register( uint8_t addr, uint8_t reg, uint8_t data );

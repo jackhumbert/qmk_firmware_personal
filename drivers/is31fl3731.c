@@ -261,6 +261,7 @@ void map_index_to_led( uint8_t index, is31_led *led ) {
 	led->driver = pgm_read_byte(addr);
 	led->matrix = pgm_read_byte(addr+1);
 	led->control_index = pgm_read_byte(addr+2);
+	led->matrix_co.raw = pgm_read_byte(addr+3);
 }
 
 void IS31FL3731_set_color( int index, uint8_t red, uint8_t green, uint8_t blue )

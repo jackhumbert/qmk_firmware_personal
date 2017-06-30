@@ -25,14 +25,15 @@
 #include "is31fl3731.h"
 #include "eeprom.h"
 #include "lufa.h"
+#include "rev5.h"
 
 #define BACKLIGHT_EFFECT_MAX 9
 
 zeal_backlight_config g_config = {
 	.brightness = 255,
 	.effect = 6, // Default to RGB test, so Zeal can flash and test in one pass!
-	.color_1 = { .h = 170, .s = 255, .v = 255 },
-	.color_2 = { .h = 170, .s = 255, .v = 255 },
+	.color_1 = { .h = 130, .s = 255, .v = 255 },
+	.color_2 = { .h = 70, .s = 255, .v = 255 },
 	.caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
 	.layer_1_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
 	.layer_2_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
@@ -45,14 +46,23 @@ typedef struct Point {
 } Point;	
 
 const is31_led g_is31_leds[DRIVER_LED_TOTAL] PROGMEM = { // driver, matrix, control_index
- 	{0, 0, 3},  {0, 0, 4},  {0, 0, 5},  {0, 1, 3},  {0, 1, 4}, {0, 1, 5}, 
- 	  {1, 0, 3},  {1, 0, 4},  {1, 0, 5},  {1, 1, 3},  {1, 1, 4},  {1, 1, 5},
- 	{0, 0, 6},  {0, 0, 7},  {0, 0, 8},  {0, 1, 6},  {0, 1, 7}, {0, 1, 8}, 
- 	  {1, 0, 6},  {1, 0, 7},  {1, 0, 8},  {1, 1, 6},  {1, 1, 7},  {1, 1, 8},
-  	{0, 0, 9},  {0, 0, 10}, {0, 0, 11}, {0, 1, 9},  {0, 1, 10}, {0, 1, 11}, 
-  	  {1, 0, 9},  {1, 0, 10}, {1, 0, 11}, {1, 1, 9},  {1, 1, 10}, {1, 1, 11},
- 	{0, 0, 12}, {0, 0, 13}, {0, 0, 14}, {0, 1, 12}, {0, 1, 13}, {0, 1, 14}, {0, 1, 15}, 
- 	  {1, 0, 12}, {1, 0, 13}, {1, 0, 14}, {1, 1, 12}, {1, 1, 13}, {1, 1, 14}
+ 	{0, 0, 3, {0|(0<<4)}},  {0, 0, 4, {0|(1<<4)}},  {0, 0, 5, {0|(2<<4)}},  {0, 1, 3, {0|(3<<4)}},  {0, 1, 4, {0|(4<<4)}}, {0, 1, 5, {0|(5<<4)}}, 
+ 	  {1, 0, 3, {0|(6<<4)}},  {1, 0, 4, {0|(7<<4)}},  {1, 0, 5, {0|(8<<4)}},  {1, 1, 3, {0|(9<<4)}},  {1, 1, 4, {0|(10<<4)}},  {1, 1, 5, {0|(11<<4)}},
+ 	{0, 0, 6, {1|(0<<4)}},  {0, 0, 7, {1|(1<<4)}},  {0, 0, 8, {1|(2<<4)}},  {0, 1, 6, {1|(3<<4)}},  {0, 1, 7, {1|(4<<4)}}, {0, 1, 8, {1|(5<<4)}}, 
+ 	  {1, 0, 6, {1|(6<<4)}},  {1, 0, 7, {1|(7<<4)}},  {1, 0, 8, {1|(8<<4)}},  {1, 1, 6, {1|(9<<4)}},  {1, 1, 7, {1|(10<<4)}},  {1, 1, 8, {1|(11<<4)}},
+  	{0, 0, 9, {2|(0<<4)}},  {0, 0, 10, {2|(1<<4)}}, {0, 0, 11, {2|(2<<4)}}, {0, 1, 9, {2|(3<<4)}},  {0, 1, 10, {2|(4<<4)}}, {0, 1, 11, {2|(5<<4)}}, 
+  	  {1, 0, 9, {2|(6<<4)}},  {1, 0, 10, {2|(7<<4)}}, {1, 0, 11, {2|(8<<4)}}, {1, 1, 9, {2|(9<<4)}},  {1, 1, 10, {2|(10<<4)}}, {1, 1, 11, {2|(11<<4)}},
+ 	{0, 0, 12, {3|(0<<4)}}, {0, 0, 13, {3|(1<<4)}}, {0, 0, 14, {3|(2<<4)}}, {0, 1, 12, {3|(3<<4)}}, {0, 1, 13, {3|(4<<4)}}, 
+ 	#ifdef PLANCK_MIT_LAYOUT
+ 	                                                                                                                        {0, 1, 14, {3|(5<<4)}}, 
+ 	    {0, 1, 15, {3|(5<<4)}}, 
+ 	{1, 0, 12, {3|(5<<4)}}, 
+    #else
+ 	                                                                                                                        {0, 1, 14, {3|(5<<4)}}, 
+ 	    {0, 1, 15, 0xFF}, 
+ 	{1, 0, 12, {3|(6<<4)}}, 
+    #endif
+ 	                          {1, 0, 13, {3|(7<<4)}}, {1, 0, 14, {3|(8<<4)}}, {1, 1, 12, {3|(9<<4)}}, {1, 1, 13, {3|(10<<4)}}, {1, 1, 14, {3|(11<<4)}}
 };
 
 bool g_suspend_state = false;
@@ -101,32 +111,17 @@ void map_led_to_point( uint8_t index, Point *point )
 	// }
 }
 
-//
-// Maps switch matrix coordinate (row,col) to LED index
-//
-
-#ifdef PLANCK_MIT_LAYOUT
-const uint8_t g_map_row_column_to_led[MATRIX_ROWS][MATRIX_COLS] PROGMEM = {
-	{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11 },
-	{ 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 },
-	{ 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 },
-	{ 36, 37, 38, 39, 40, 42,255, 44, 45, 46, 47, 48 }
-};
-#else
-const uint8_t g_map_row_column_to_led[MATRIX_ROWS][MATRIX_COLS] PROGMEM = {
-	{ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11 },
-	{ 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 },
-	{ 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 },
-	{ 36, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 48 }
-};
-#endif
-
-void map_row_column_to_led( uint8_t row, uint8_t column, uint8_t *led )
+void map_row_column_to_led( uint8_t row, uint8_t column, uint8_t *led_i, uint8_t *led_count)
 {
-	*led = 255;
-	if ( row < MATRIX_ROWS && column < MATRIX_COLS )
-	{
-		*led = pgm_read_byte(&g_map_row_column_to_led[row][column]);
+	is31_led led;
+	*led_count = 0;
+
+	for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+		map_index_to_led(i, &led);
+		if (row == led.matrix_co.row && column == led.matrix_co.col) {
+			led_i[*led_count] = i;
+			(*led_count)++;
+		}
 	}
 }
 
@@ -142,11 +137,17 @@ void matrix_init_kb(void) {
 	DDRD |= (1<<6);
 	PORTD |= (1<<6);
 
-	// Enable speaker
-	DDRB |= (1<<4);
-	PORTB &= ~(1<<4);
-
 	matrix_init_user();
+}
+
+bool process_record_kb(uint16_t keycode, keyrecord_t *record)
+{
+	// Record keypresses for backlight effects
+	if ( record->event.pressed )
+	{
+		backlight_set_key_hit( record->event.key.row, record->event.key.col );
+	}
+		return process_record_user(keycode, record);
 }
 
 uint16_t backlight_task_counter = 0;
@@ -157,7 +158,7 @@ void matrix_scan_kb(void)
 	if (backlight_task_counter == 0)
 		backlight_rgb_task();
 		// backlight_effect_single_LED_test();
-	backlight_task_counter = ((backlight_task_counter + 1) % 5);
+	backlight_task_counter = ((backlight_task_counter + 1) % 20);
 
 	// This only updates the LED driver buffers if something has changed.
 	backlight_update_pwm_buffers();
@@ -200,9 +201,10 @@ void backlight_set_color_all( uint8_t red, uint8_t green, uint8_t blue )
 
 void backlight_set_key_hit(uint8_t row, uint8_t column)
 {
-	uint8_t led;
-	map_row_column_to_led(row,column,&led);
-	g_key_hit[led] = 0;
+	uint8_t led[8], led_count;
+	map_row_column_to_led(row,column,led,&led_count);
+	for(uint8_t i = 0; i < led_count; i++)
+		g_key_hit[led[i]] = 0;
 
 	g_any_key_hit = 0;
 }
@@ -318,10 +320,12 @@ void backlight_effect_single_LED_test(void)
 		color = 0;
 	}
 
-	uint8_t led;
-	map_row_column_to_led( row, column, &led );
-	backlight_set_color_all( 40, 40, 40 );
-	backlight_test_led( led, color==0, color==1, color==2 );
+	uint8_t led[8], led_count;
+	map_row_column_to_led(row,column,led,&led_count);
+	for(uint8_t i = 0; i < led_count; i++) {
+		backlight_set_color_all( 40, 40, 40 );
+		backlight_test_led( led[i], color==0, color==1, color==2 );
+	}
 }
 
 // All LEDs off
@@ -348,17 +352,19 @@ void backlight_effect_alphas_mods(void)
 	{
 		for ( int column = 0; column < MATRIX_COLS; column++ )
 		{
-			uint8_t index;
-			map_row_column_to_led( row, column, &index );
-			if ( index < DRIVER_LED_TOTAL )
-			{
-				if ( ( g_config.alphas_mods[row] & (1<<column) ) == 0 )
+			uint8_t led[8], led_count;
+			map_row_column_to_led(row,column,led,&led_count);
+			for(uint8_t i = 0; i < led_count; i++) {
+				if ( led[0] < DRIVER_LED_TOTAL )
 				{
-					backlight_set_color( index, rgb1.r, rgb1.g, rgb1.b );
-				}
-				else
-				{
-					backlight_set_color( index, rgb2.r, rgb2.g, rgb2.b );
+					if ( ( g_config.alphas_mods[row] & (1<<column) ) == 0 )
+					{
+						backlight_set_color( led[0], rgb1.r, rgb1.g, rgb1.b );
+					}
+					else
+					{
+						backlight_set_color( led[0], rgb2.r, rgb2.g, rgb2.b );
+					}
 				}
 			}
 		}
@@ -451,21 +457,20 @@ void backlight_effect_cycle_all(void)
 {
 	uint8_t offset = g_tick & 0xFF;
 
+	is31_led led;
+
 	// Relies on hue being 8-bit and wrapping
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		uint16_t offset2 = g_key_hit[i]<<2;
-		// stabilizer LEDs use spacebar hits
-		if ( i == 36+6 || i == 54+13 || // LC6, LD13
-				( g_config.use_7u_spacebar && i == 54+14 ) ) // LD14
-		{
-			offset2 = g_key_hit[36+0]<<2;
-		}
-		offset2 = (offset2<=63) ? (63-offset2) : 0;
+		map_index_to_led(i, &led);
+		if (led.matrix_co.raw < 0xFF) {
+			uint16_t offset2 = g_key_hit[i]<<2;
+			offset2 = (offset2<=63) ? (63-offset2) : 0;
 
-		HSV hsv = { .h = offset+offset2, .s = 255, .v = g_config.brightness };
-		RGB rgb = hsv_to_rgb( hsv );
-		backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+			HSV hsv = { .h = offset+offset2, .s = 255, .v = g_config.brightness };
+			RGB rgb = hsv_to_rgb( hsv );
+			backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+		}
 	}
 }
 
@@ -720,18 +725,23 @@ void backlight_rgb_task(void) {
 
 }
 
-void backlight_set_indicator_index( uint8_t *index, uint8_t row, uint8_t column )
-{
-	if ( row >= MATRIX_ROWS )
-	{
-		// Special value, 255=none, 254=all
-		*index = row;
-	}
-	else
-	{
-		map_row_column_to_led( row, column, index );
-	}
-}
+// void backlight_set_indicator_index( uint8_t *index, uint8_t row, uint8_t column )
+// {
+// 	if ( row >= MATRIX_ROWS )
+// 	{
+// 		// Special value, 255=none, 254=all
+// 		*index = row;
+// 	}
+// 	else
+// 	{
+// 		// This needs updated to something like
+// 		// uint8_t led[8], led_count;
+// 		// map_row_column_to_led(row,column,led,&led_count);
+// 		// for(uint8_t i = 0; i < led_count; i++)
+// 		map_row_column_to_led( row, column, index );
+// 	}
+// }
+
 void backlight_config_set_alphas_mods( uint16_t *alphas_mods )
 {
 	for ( int i=0; i<5; i++ )
@@ -882,14 +892,16 @@ void backlight_get_key_color( uint8_t led, HSV *hsv )
 
 void backlight_set_key_color( uint8_t row, uint8_t column, HSV hsv )
 {
-	uint8_t led;
-	map_row_column_to_led( row, column, &led );
-	if ( led < DRIVER_LED_TOTAL )
-	{
-		void *address = backlight_get_custom_key_color_eeprom_address(led);
-		eeprom_update_byte(address, hsv.h);
-		eeprom_update_byte(address+1, hsv.s);
-		eeprom_update_byte(address+2, hsv.v);
+	uint8_t led[8], led_count;
+	map_row_column_to_led(row,column,led,&led_count);
+	for(uint8_t i = 0; i < led_count; i++) {
+		if ( led[i] < DRIVER_LED_TOTAL )
+		{
+			void *address = backlight_get_custom_key_color_eeprom_address(led[i]);
+			eeprom_update_byte(address, hsv.h);
+			eeprom_update_byte(address+1, hsv.s);
+			eeprom_update_byte(address+2, hsv.v);
+		}
 	}
 }
 
