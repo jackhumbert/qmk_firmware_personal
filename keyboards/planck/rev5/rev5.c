@@ -29,8 +29,8 @@
 #define BACKLIGHT_EFFECT_MAX 9
 
 zeal_backlight_config g_config = {
-	.brightness = 40,
-	.effect = 1, // Default to RGB test, so Zeal can flash and test in one pass!
+	.brightness = 255,
+	.effect = 6, // Default to RGB test, so Zeal can flash and test in one pass!
 	.color_1 = { .h = 170, .s = 255, .v = 255 },
 	.color_2 = { .h = 170, .s = 255, .v = 255 },
 	.caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
@@ -157,7 +157,7 @@ void matrix_scan_kb(void)
 	if (backlight_task_counter == 0)
 		backlight_rgb_task();
 		// backlight_effect_single_LED_test();
-	backlight_task_counter = ((backlight_task_counter + 1) % 20);
+	backlight_task_counter = ((backlight_task_counter + 1) % 5);
 
 	// This only updates the LED driver buffers if something has changed.
 	backlight_update_pwm_buffers();
