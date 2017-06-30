@@ -480,22 +480,20 @@ void backlight_effect_cycle_left_right(void)
 	HSV hsv = { .h = 0, .s = 255, .v = g_config.brightness };
 	RGB rgb;
 	Point point;
+	is31_led led;
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		uint16_t offset2 = g_key_hit[i]<<2;
-		// stabilizer LEDs use spacebar hits
-		if ( i == 36+6 || i == 54+13 || // LC6, LD13
-				( g_config.use_7u_spacebar && i == 54+14 ) ) // LD14
-		{
-			offset2 = g_key_hit[36+0]<<2;
-		}
-		offset2 = (offset2<=63) ? (63-offset2) : 0;
+		map_index_to_led(i, &led);
+		if (led.matrix_co.raw < 0xFF) {
+			uint16_t offset2 = g_key_hit[i]<<2;
+			offset2 = (offset2<=63) ? (63-offset2) : 0;
 
-		map_led_to_point( i, &point );
-		// Relies on hue being 8-bit and wrapping
-		hsv.h = point.x + offset + offset2;
-		rgb = hsv_to_rgb( hsv );
-		backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+			map_led_to_point( i, &point );
+			// Relies on hue being 8-bit and wrapping
+			hsv.h = point.x + offset + offset2;
+			rgb = hsv_to_rgb( hsv );
+			backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+		}
 	}
 }
 
@@ -505,22 +503,20 @@ void backlight_effect_cycle_up_down(void)
 	HSV hsv = { .h = 0, .s = 255, .v = g_config.brightness };
 	RGB rgb;
 	Point point;
+	is31_led led;
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		uint16_t offset2 = g_key_hit[i]<<2;
-		// stabilizer LEDs use spacebar hits
-		if ( i == 36+6 || i == 54+13 || // LC6, LD13
-				( g_config.use_7u_spacebar && i == 54+14 ) ) // LD14
-		{
-			offset2 = g_key_hit[36+0]<<2;
-		}
-		offset2 = (offset2<=63) ? (63-offset2) : 0;
+		map_index_to_led(i, &led);
+		if (led.matrix_co.raw < 0xFF) {
+			uint16_t offset2 = g_key_hit[i]<<2;
+			offset2 = (offset2<=63) ? (63-offset2) : 0;
 
-		map_led_to_point( i, &point );
-		// Relies on hue being 8-bit and wrapping
-		hsv.h = point.y + offset + offset2;
-		rgb = hsv_to_rgb( hsv );
-		backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+			map_led_to_point( i, &point );
+			// Relies on hue being 8-bit and wrapping
+			hsv.h = point.y + offset + offset2;
+			rgb = hsv_to_rgb( hsv );
+			backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+		}
 	}
 }
 
