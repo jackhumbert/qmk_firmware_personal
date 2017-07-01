@@ -18,6 +18,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 #include "TWIlib.h"
 #include "progmem.h"
 
@@ -257,19 +258,25 @@ void IS31FL3731_init( uint8_t addr )
 
 
 void map_index_to_led( uint8_t index, is31_led *led ) {
-	uint8_t *addr = (uint8_t*)&g_is31_leds[index];
-	led->driver = pgm_read_byte(addr);
-	led->matrix = pgm_read_byte(addr+1);
-	led->control_index = pgm_read_byte(addr+2);
-	led->matrix_co.raw = pgm_read_byte(addr+3);
+	//led = , sizeof(struct is31_led));
+	// led->driver = addr->driver;
+	// led->matrix = addr->matrix;
+	// led->modifier = addr->modifier;
+	// led->control_index = addr->control_index;
+	// led->matrix_co.raw = addr->matrix_co.raw;
+	// led->driver = (pgm_read_byte(addr) >> 6) && 0b11;
+	// led->matrix = (pgm_read_byte(addr) >> 4) && 0b1;
+	// led->modifier = (pgm_read_byte(addr) >> 3) && 0b1;
+	// led->control_index = pgm_read_byte(addr+1);
+	// led->matrix_co.raw = pgm_read_byte(addr+2);
 }
 
 void IS31FL3731_set_color( int index, uint8_t red, uint8_t green, uint8_t blue )
 {
 	if ( index >= 0 && index < DRIVER_LED_TOTAL )
 	{
-		is31_led led;
-		map_index_to_led(index, &led);
+		is31_led led = g_is31_leds[index];
+		//map_index_to_led(index, &led);
 
 		// Subtract 0x24 to get the second index of g_pwm_buffer
 		g_pwm_buffer[led.driver][ pgm_read_byte(&g_map_control_index_to_register[led.matrix][led.control_index][0]) - 0x24] = red;
@@ -289,8 +296,8 @@ void IS31FL3731_set_color_all( uint8_t red, uint8_t green, uint8_t blue )
 
 void IS31FL3731_set_led_control_register( uint8_t index, bool red, bool green, bool blue )
 {
-	is31_led led;
-	map_index_to_led(index, &led);
+	is31_led led = g_is31_leds[index];
+	// map_index_to_led(index, &led);
 
 	led_control_bitmask bitmask = g_led_control_bitmask[led.control_index];
 

@@ -22,8 +22,9 @@
 #include <stdbool.h>
 
 typedef struct is31_led {
-	uint8_t driver;
-	uint8_t matrix;
+	uint8_t driver:2;
+	uint8_t matrix:1;
+	uint8_t modifier:1;
 	uint8_t control_index;
 	union {
 		uint8_t raw;
@@ -32,7 +33,7 @@ typedef struct is31_led {
 			uint8_t col:4;
 		};
 	} matrix_co;
-} is31_led;
+} __attribute__((packed)) is31_led;
 
 extern const is31_led g_is31_leds[DRIVER_LED_TOTAL];
 

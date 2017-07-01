@@ -31,7 +31,7 @@
 
 zeal_backlight_config g_config = {
 	.brightness = 255,
-	.effect = 6, // Default to RGB test, so Zeal can flash and test in one pass!
+	.effect = 2, // Default to RGB test, so Zeal can flash and test in one pass!
 	.color_1 = { .h = 130, .s = 255, .v = 255 },
 	.color_2 = { .h = 70, .s = 255, .v = 255 },
 	.caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
@@ -45,24 +45,24 @@ typedef struct Point {
 	uint8_t y;
 } Point;	
 
-const is31_led g_is31_leds[DRIVER_LED_TOTAL] PROGMEM = { // driver, matrix, control_index
- 	{0, 0, 3, {0|(0<<4)}},  {0, 0, 4, {0|(1<<4)}},  {0, 0, 5, {0|(2<<4)}},  {0, 1, 3, {0|(3<<4)}},  {0, 1, 4, {0|(4<<4)}}, {0, 1, 5, {0|(5<<4)}}, 
- 	  {1, 0, 3, {0|(6<<4)}},  {1, 0, 4, {0|(7<<4)}},  {1, 0, 5, {0|(8<<4)}},  {1, 1, 3, {0|(9<<4)}},  {1, 1, 4, {0|(10<<4)}},  {1, 1, 5, {0|(11<<4)}},
- 	{0, 0, 6, {1|(0<<4)}},  {0, 0, 7, {1|(1<<4)}},  {0, 0, 8, {1|(2<<4)}},  {0, 1, 6, {1|(3<<4)}},  {0, 1, 7, {1|(4<<4)}}, {0, 1, 8, {1|(5<<4)}}, 
- 	  {1, 0, 6, {1|(6<<4)}},  {1, 0, 7, {1|(7<<4)}},  {1, 0, 8, {1|(8<<4)}},  {1, 1, 6, {1|(9<<4)}},  {1, 1, 7, {1|(10<<4)}},  {1, 1, 8, {1|(11<<4)}},
-  	{0, 0, 9, {2|(0<<4)}},  {0, 0, 10, {2|(1<<4)}}, {0, 0, 11, {2|(2<<4)}}, {0, 1, 9, {2|(3<<4)}},  {0, 1, 10, {2|(4<<4)}}, {0, 1, 11, {2|(5<<4)}}, 
-  	  {1, 0, 9, {2|(6<<4)}},  {1, 0, 10, {2|(7<<4)}}, {1, 0, 11, {2|(8<<4)}}, {1, 1, 9, {2|(9<<4)}},  {1, 1, 10, {2|(10<<4)}}, {1, 1, 11, {2|(11<<4)}},
- 	{0, 0, 12, {3|(0<<4)}}, {0, 0, 13, {3|(1<<4)}}, {0, 0, 14, {3|(2<<4)}}, {0, 1, 12, {3|(3<<4)}}, {0, 1, 13, {3|(4<<4)}}, 
+const is31_led g_is31_leds[DRIVER_LED_TOTAL] = { // driver, matrix, modifier, control_index, {row | col << 4}
+ 	{0, 0, 1, 3, {0|(0<<4)}},  {0, 0, 0, 4, {0|(1<<4)}},  {0, 0, 0, 5, {0|(2<<4)}},  {0, 1, 0, 3, {0|(3<<4)}},  {0, 1, 0, 4, {0|(4<<4)}}, {0, 1, 0, 5, {0|(5<<4)}}, 
+ 	  {1, 0, 0, 3, {0|(6<<4)}},  {1, 0, 0, 4, {0|(7<<4)}},  {1, 0, 0, 5, {0|(8<<4)}},  {1, 1, 0, 3, {0|(9<<4)}},  {1, 1, 0, 4, {0|(10<<4)}},  {1, 1, 1, 5, {0|(11<<4)}},
+ 	{0, 0, 1, 6, {1|(0<<4)}},  {0, 0, 0, 7, {1|(1<<4)}},  {0, 0, 0, 8, {1|(2<<4)}},  {0, 1, 0, 6, {1|(3<<4)}},  {0, 1, 0, 7, {1|(4<<4)}}, {0, 1, 0, 8, {1|(5<<4)}}, 
+ 	  {1, 0, 0, 6, {1|(6<<4)}},  {1, 0, 0, 7, {1|(7<<4)}},  {1, 0, 0, 8, {1|(8<<4)}},  {1, 1, 0, 6, {1|(9<<4)}},  {1, 1, 0, 7, {1|(10<<4)}},  {1, 1, 1, 8, {1|(11<<4)}},
+  	{0, 0, 1, 9, {2|(0<<4)}},  {0, 0, 0, 10, {2|(1<<4)}}, {0, 0, 0, 11, {2|(2<<4)}}, {0, 1, 0, 9, {2|(3<<4)}},  {0, 1, 0, 10, {2|(4<<4)}}, {0, 1, 0, 11, {2|(5<<4)}}, 
+  	  {1, 0, 0, 9, {2|(6<<4)}},  {1, 0, 0, 10, {2|(7<<4)}}, {1, 0, 0, 11, {2|(8<<4)}}, {1, 1, 0, 9, {2|(9<<4)}},  {1, 1, 0, 10, {2|(10<<4)}}, {1, 1, 1, 11, {2|(11<<4)}},
+ 	{0, 0, 1, 12, {3|(0<<4)}}, {0, 0, 1, 13, {3|(1<<4)}}, {0, 0, 1, 14, {3|(2<<4)}}, {0, 1, 1, 12, {3|(3<<4)}}, {0, 1, 1, 13, {3|(4<<4)}}, 
  	#ifdef PLANCK_MIT_LAYOUT
- 	                                                                                                                        {0, 1, 14, {3|(5<<4)}}, 
- 	    {0, 1, 15, {3|(5<<4)}}, 
- 	{1, 0, 12, {3|(5<<4)}}, 
+ 	                                                                                                                        {0, 1, 0, 14, {3|(5<<4)}}, 
+ 	    {0, 1, 0, 15, {3|(5<<4)}}, 
+ 	  {1, 0, 0, 12, {3|(5<<4)}}, 
     #else
- 	                                                                                                                        {0, 1, 14, {3|(5<<4)}}, 
- 	    {0, 1, 15, 0xFF}, 
- 	{1, 0, 12, {3|(6<<4)}}, 
+ 	                                                                                                                        {0, 1, 0, 14, {3|(5<<4)}}, 
+ 	    {0, 1, 0, 15, {0xFF}}, 
+ 	  {1, 0, 0, 12, {3|(6<<4)}}, 
     #endif
- 	                          {1, 0, 13, {3|(7<<4)}}, {1, 0, 14, {3|(8<<4)}}, {1, 1, 12, {3|(9<<4)}}, {1, 1, 13, {3|(10<<4)}}, {1, 1, 14, {3|(11<<4)}}
+ 	                          {1, 0, 1, 13, {3|(7<<4)}}, {1, 0, 1, 14, {3|(8<<4)}}, {1, 1, 1, 12, {3|(9<<4)}}, {1, 1, 1, 13, {3|(10<<4)}}, {1, 1, 1, 14, {3|(11<<4)}}
 };
 
 bool g_suspend_state = false;
@@ -117,7 +117,8 @@ void map_row_column_to_led( uint8_t row, uint8_t column, uint8_t *led_i, uint8_t
 	*led_count = 0;
 
 	for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
-		map_index_to_led(i, &led);
+		// map_index_to_led(i, &led);
+		led = g_is31_leds[i];
 		if (row == led.matrix_co.row && column == led.matrix_co.col) {
 			led_i[*led_count] = i;
 			(*led_count)++;
@@ -352,18 +353,21 @@ void backlight_effect_alphas_mods(void)
 	{
 		for ( int column = 0; column < MATRIX_COLS; column++ )
 		{
-			uint8_t led[8], led_count;
-			map_row_column_to_led(row,column,led,&led_count);
+			uint8_t led_i[8], led_count;
+			map_row_column_to_led(row,column,led_i,&led_count);
+			is31_led led;
 			for(uint8_t i = 0; i < led_count; i++) {
-				if ( led[0] < DRIVER_LED_TOTAL )
+				// map_index_to_led(led_i[i], &led);
+				led = g_is31_leds[led_i[i]];
+				if ( led_i[0] < DRIVER_LED_TOTAL )
 				{
-					if ( ( g_config.alphas_mods[row] & (1<<column) ) == 0 )
+					if ( led.modifier )
 					{
-						backlight_set_color( led[0], rgb1.r, rgb1.g, rgb1.b );
+						backlight_set_color( led_i[0], rgb2.r, rgb2.g, rgb2.b );
 					}
 					else
 					{
-						backlight_set_color( led[0], rgb2.r, rgb2.g, rgb2.b );
+						backlight_set_color( led_i[0], rgb1.r, rgb1.g, rgb1.b );
 					}
 				}
 			}
@@ -462,7 +466,8 @@ void backlight_effect_cycle_all(void)
 	// Relies on hue being 8-bit and wrapping
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		map_index_to_led(i, &led);
+		// map_index_to_led(i, &led);
+		led = g_is31_leds[i];
 		if (led.matrix_co.raw < 0xFF) {
 			uint16_t offset2 = g_key_hit[i]<<2;
 			offset2 = (offset2<=63) ? (63-offset2) : 0;
@@ -483,7 +488,8 @@ void backlight_effect_cycle_left_right(void)
 	is31_led led;
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		map_index_to_led(i, &led);
+		// map_index_to_led(i, &led);
+		led = g_is31_leds[i];
 		if (led.matrix_co.raw < 0xFF) {
 			uint16_t offset2 = g_key_hit[i]<<2;
 			offset2 = (offset2<=63) ? (63-offset2) : 0;
@@ -506,7 +512,8 @@ void backlight_effect_cycle_up_down(void)
 	is31_led led;
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
-		map_index_to_led(i, &led);
+		// map_index_to_led(i, &led);
+		led = g_is31_leds[i];
 		if (led.matrix_co.raw < 0xFF) {
 			uint16_t offset2 = g_key_hit[i]<<2;
 			offset2 = (offset2<=63) ? (63-offset2) : 0;
