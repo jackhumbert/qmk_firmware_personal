@@ -93,11 +93,11 @@ const is31_led g_is31_leds[DRIVER_LED_TOTAL] = { // driver, matrix, modifier, co
     {0, 1, 1, 13, {3|(4<<4)},  {18*4, 16*3}}, 
 #ifdef PLANCK_MIT_LAYOUT
     {0, 1, 0, 14, {3|(5<<4)},  {18*5, 16*3}}, 
-    {0, 1, 0, 15, {3|(5<<4)},  {18*5, 16*3.5}}, 
+    {0, 1, 0, 15, {3|(5<<4)},  {18*5.5, 16*3}}, 
     {1, 0, 0, 12, {3|(5<<4)},  {18*6, 16*3}}, 
 #else
     {0, 1, 0, 14, {3|(5<<4)},  {18*5, 16*3}}, 
-    {0, 1, 0, 15, {0xFF},      {18*5, 16*3.5}}, 
+    {0, 1, 0, 15, {0xFF},      {18*5.5, 16*3}}, 
     {1, 0, 0, 12, {3|(6<<4)},  {18*6, 16*3}}, 
 #endif
     {1, 0, 1, 13, {3|(7<<4)},  {18*7, 16*3}}, 
@@ -155,7 +155,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record)
     if ( record->event.pressed ) {
         backlight_set_key_hit( record->event.key.row, record->event.key.col );
     } else {
-        backlight_unset_key_hit( record->event.key.row, record->event.key.col );
+        // backlight_unset_key_hit( record->event.key.row, record->event.key.col );
     }
     
     return process_record_user(keycode, record);
