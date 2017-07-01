@@ -348,28 +348,18 @@ void backlight_effect_alphas_mods(void)
 {
 	RGB rgb1 = hsv_to_rgb( (HSV){ .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness } );
 	RGB rgb2 = hsv_to_rgb( (HSV){ .h = g_config.color_2.h, .s = g_config.color_2.s, .v = g_config.brightness } );
-
-	for ( int row = 0; row < MATRIX_ROWS; row++ )
-	{
-		for ( int column = 0; column < MATRIX_COLS; column++ )
-		{
-			uint8_t led_i[8], led_count;
-			map_row_column_to_led(row,column,led_i,&led_count);
-			is31_led led;
-			for(uint8_t i = 0; i < led_count; i++) {
-				// map_index_to_led(led_i[i], &led);
-				led = g_is31_leds[led_i[i]];
-				if ( led_i[0] < DRIVER_LED_TOTAL )
-				{
-					if ( led.modifier )
-					{
-						backlight_set_color( led_i[0], rgb2.r, rgb2.g, rgb2.b );
-					}
-					else
-					{
-						backlight_set_color( led_i[0], rgb1.r, rgb1.g, rgb1.b );
-					}
-				}
+	
+	is31_led led;
+	for (int i = 0; i < DRIVER_LED_TOTAL; i++) {
+		led = g_is31_leds[i];
+		if ( led.matrix_co.raw < 0xFF ) {
+			if ( led.modifier )
+			{
+				backlight_set_color( i, rgb2.r, rgb2.g, rgb2.b );
+			}
+			else
+			{
+				backlight_set_color( i, rgb1.r, rgb1.g, rgb1.b );
 			}
 		}
 	}
