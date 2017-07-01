@@ -82,6 +82,7 @@ void backlight_rgb_task(void);
 void backlight_update_pwm_buffers(void);
 
 void backlight_set_key_hit(uint8_t row, uint8_t col);
+void backlight_unset_key_hit(uint8_t row, uint8_t col);
 
 void backlight_effect_increase(void);
 void backlight_effect_decrease(void);

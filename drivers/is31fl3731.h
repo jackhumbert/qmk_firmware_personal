@@ -21,6 +21,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef struct Point {
+	uint8_t x;
+	uint8_t y;
+} __attribute__((packed)) Point;
+
 typedef struct is31_led {
 	uint8_t driver:2;
 	uint8_t matrix:1;
@@ -29,10 +34,11 @@ typedef struct is31_led {
 	union {
 		uint8_t raw;
 		struct {
-			uint8_t row:4;
-			uint8_t col:4;
+			uint8_t row:4; // 16 max
+			uint8_t col:4; // 16 max
 		};
 	} matrix_co;
+	Point point;
 } __attribute__((packed)) is31_led;
 
 extern const is31_led g_is31_leds[DRIVER_LED_TOTAL];
