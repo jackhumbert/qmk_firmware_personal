@@ -18,6 +18,17 @@
 
 #define BACKLIGHT_PIN A5
 
+/* Size of Bootloaders in bytes:
+ *   Atmel DFU loader(ATmega32U4)   4096
+ *   Atmel DFU loader(AT90USB128)   8192
+ *   LUFA bootloader(ATmega32U4)    4096
+ *   Arduino Caterina(ATmega32U4)   4096
+ *   USBaspLoader(ATmega***)        2048
+ *   Teensy   halfKay(ATmega32U4)   512
+ *   Teensy++ halfKay(AT90USB128)   1024
+ */
+#define BOOTLOADER_SIZE 8192 
+
 #define PLANCK_MIT_LAYOUT
 
 // This is a 7-bit address, that gets left-shifted and bit 0
