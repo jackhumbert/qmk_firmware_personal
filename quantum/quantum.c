@@ -242,7 +242,6 @@ bool process_record_quantum(keyrecord_t *record) {
     return false;
     break;
   #endif
-	#ifdef RGBLIGHT_ENABLE
 	case RGB_TOG:
 		if (record->event.pressed) {
 			rgblight_toggle();
@@ -291,7 +290,6 @@ bool process_record_quantum(keyrecord_t *record) {
       }
 	  return false;
       break;
-	#endif
     #ifdef PROTOCOL_LUFA
     case OUT_AUTO:
       if (record->event.pressed) {

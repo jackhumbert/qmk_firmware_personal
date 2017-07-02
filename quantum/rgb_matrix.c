@@ -28,7 +28,8 @@
 
 #define BACKLIGHT_EFFECT_MAX 9
 
-zeal_backlight_config g_config = {
+rgb_matrix_config g_config = {
+	.enabled = 1,
     .brightness = 255,
     .effect = 6,
     .color_1 = { .h = 130, .s = 255, .v = 255 },
@@ -235,6 +236,20 @@ void backlight_effect_solid_color(void)
     HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
     RGB rgb = hsv_to_rgb( hsv );
     backlight_set_color_all( rgb.r, rgb.g, rgb.b );
+}
+
+void backlight_effect_solid_reactive(void)
+{
+	// Relies on hue being 8-bit and wrapping
+	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
+	{
+		uint16_t offset2 = g_key_hit[i]<<2;
+		offset2 = (offset2<=63) ? (63-offset2) : 0;
+
+		HSV hsv = { .h = g_config.color_1.h+offset2, .s = 255, .v = g_config.brightness };
+		RGB rgb = hsv_to_rgb( hsv );
+		backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+	}
 }
 
 // alphas = color1, mods = color2
@@ -527,6 +542,10 @@ void backlight_effect_indicators(void)
 }
 
 void backlight_rgb_task(void) {
+	if (!g_config.enabled) {
+    	backlight_effect_all_off();
+    	return;
+    }
     // delay 1 second before driving LEDs or doing anything else
     static uint8_t startup_tick = 0;
     if ( startup_tick < 20 )
@@ -576,10 +595,10 @@ void backlight_rgb_task(void) {
     switch ( effect )
     {
         case 0:
-            backlight_effect_all_off();
+            backlight_effect_solid_color();
             break;
         case 1:
-            backlight_effect_solid_color();
+            backlight_effect_solid_reactive();
             break;
         case 2:
             backlight_effect_alphas_mods();
@@ -644,12 +663,12 @@ void backlight_config_set_alphas_mods( uint16_t *alphas_mods )
 
 void backlight_config_load(void)
 {
-    eeprom_read_block( &g_config, EEPROM_BACKLIGHT_CONFIG_ADDR, sizeof(zeal_backlight_config) );
+    eeprom_read_block( &g_config, EEPROM_BACKLIGHT_CONFIG_ADDR, sizeof(rgb_matrix_config) );
 }
 
 void backlight_config_save(void)
 {
-    eeprom_update_block( &g_config, EEPROM_BACKLIGHT_CONFIG_ADDR, sizeof(zeal_backlight_config) );
+    eeprom_update_block( &g_config, EEPROM_BACKLIGHT_CONFIG_ADDR, sizeof(rgb_matrix_config) );
 }
 
 void backlight_init_drivers(void)
@@ -830,3 +849,45 @@ void backlight_debug_led( bool state )
     //  PORTD &= ~(1<<6);
     // }
 }
+
+void rgblight_toggle(void) {
+	g_config.enabled ^= 1;
+    backlight_config_save();
+};
+
+void rgblight_step(void) {
+    g_config.effect = (g_config.effect + 1) % (BACKLIGHT_EFFECT_MAX + 1);
+    backlight_config_save();
+};
+
+void rgblight_increase_hue(void) {
+	backlight_color_1_hue_increase();
+	backlight_color_2_hue_increase();
+};
+
+void rgblight_decrease_hue(void) {
+	backlight_color_1_hue_decrease();
+	backlight_color_2_hue_decrease();
+};
+
+void rgblight_increase_sat(void) {
+	backlight_color_1_sat_increase();
+	backlight_color_2_sat_increase();
+};
+
+void rgblight_decrease_sat(void) {
+	backlight_color_1_sat_decrease();
+	backlight_color_2_sat_decrease();
+};
+
+void rgblight_increase_val(void) {
+    g_config.color_1.v = increment( g_config.color_1.s, 8, 0, 255 );
+    g_config.color_2.v = increment( g_config.color_1.s, 8, 0, 255 );
+    backlight_config_save();
+};
+
+void rgblight_decrease_val(void) {
+    g_config.color_1.v = decrement( g_config.color_1.s, 8, 0, 255 );
+    g_config.color_2.v = decrement( g_config.color_1.s, 8, 0, 255 );
+    backlight_config_save();
+};

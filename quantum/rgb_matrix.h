@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct
 {
-	bool use_split_backspace:1;         // |
+	bool enabled:1;                     // |
 	bool use_split_left_shift:1;        // |
 	bool use_split_right_shift:1;       // |
 	bool use_7u_spacebar:1;             // |
@@ -50,10 +50,10 @@ typedef struct
 	zeal_indicator layer_2_indicator;	// 4 bytes
 	zeal_indicator layer_3_indicator;	// 4 bytes
 	uint16_t alphas_mods[5];            // 10 bytes
-} zeal_backlight_config;                // = 36 bytes
+} rgb_matrix_config;                // = 36 bytes
 
 #define EEPROM_BACKLIGHT_CONFIG_ADDR ((void*)35)
-// zeal_backlight_config uses 36 bytes
+// rgb_matrix_config uses 36 bytes
 // 35+36=71
 #define EEPROM_BACKLIGHT_KEY_COLOR_ADDR ((void*)71)
 
@@ -107,5 +107,14 @@ void backlight_set_key_color( uint8_t row, uint8_t column, HSV hsv );
 void backlight_test_led( uint8_t index, bool red, bool green, bool blue );
 uint32_t backlight_get_tick(void);
 void backlight_debug_led(bool state);
+
+void rgblight_toggle(void);
+void rgblight_step(void);
+void rgblight_increase_hue(void);
+void rgblight_decrease_hue(void);
+void rgblight_increase_sat(void);
+void rgblight_decrease_sat(void);
+void rgblight_increase_val(void);
+void rgblight_decrease_val(void);
 
 #endif
