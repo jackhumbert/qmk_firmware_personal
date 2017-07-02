@@ -93,11 +93,12 @@ ifeq ($(strip $(RGBLIGHT_ENABLE)), yes)
     LED_BREATHING_TABLE = yes
 endif
 
-ifeq ($(strip $(RGBARRAY_ENABLE)), yes)
-    OPT_DEFS += -DRGBARRAY_ENABLE
+ifeq ($(strip $(RGB_MATRIX_ENABLE)), yes)
+    OPT_DEFS += -DRGB_MATRIX_ENABLE
     SRC += $(DRIVER_DIR)/is31fl3731.c
     SRC += $(DRIVER_DIR)/TWIlib.c
     SRC += $(QUANTUM_DIR)/color.c
+    SRC += $(QUANTUM_DIR)/rgb_matrix.c
     CIE1931_CURVE = yes
 endif
 
