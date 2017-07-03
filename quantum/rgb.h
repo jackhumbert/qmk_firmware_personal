@@ -18,27 +18,27 @@
 #define RGB_H
 
 __attribute__((weak))
-inline void rgblight_toggle(void) {};
+void rgblight_toggle(void) {};
 
 __attribute__((weak))
-inline void rgblight_step(void) {};
+void rgblight_step(void) {};
 
 __attribute__((weak))
-inline void rgblight_increase_hue(void) {};
+void rgblight_increase_hue(void) {};
 
 __attribute__((weak))
-inline void rgblight_decrease_hue(void) {};
+void rgblight_decrease_hue(void) {};
 
 __attribute__((weak))
-inline void rgblight_increase_sat(void) {};
+void rgblight_increase_sat(void) {};
 
 __attribute__((weak))
-inline void rgblight_decrease_sat(void) {};
+void rgblight_decrease_sat(void) {};
 
 __attribute__((weak))
-inline void rgblight_increase_val(void) {};
+void rgblight_increase_val(void) {};
 
 __attribute__((weak))
-inline void rgblight_decrease_val(void) {};
+void rgblight_decrease_val(void) {};
 
 #endif

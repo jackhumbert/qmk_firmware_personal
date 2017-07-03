@@ -29,6 +29,8 @@
  */
 #define BOOTLOADER_SIZE 8192 
 
+#define NO_USB_STARTUP_CHECK
+
 #define PLANCK_MIT_LAYOUT
 
 // This is a 7-bit address, that gets left-shifted and bit 0

@@ -828,7 +828,7 @@ void backlight_set(uint8_t level)
     }
   #endif
 
-  #ifdef BACKLIGHT_BREATHING
+  #if defined(BACKLIGHT_BREATHING)
     breathing_intensity_default();
   #endif
 }
@@ -860,6 +860,23 @@ void backlight_task(void) {
 }
 
 #ifdef BACKLIGHT_BREATHING
+
+
+#ifdef NO_BACKLIGHT_CLOCK
+  void breathing_enable(void) {}
+  void breathing_pulse(void) {}
+  void breathing_disable(void) {}
+  void breathing_self_disable(void) {}
+  void breathing_toggle(void) {}
+  bool is_breathing(void) { return false; }
+  void breathing_intensity_default(void) {}
+  void breathing_intensity_set(uint8_t value) {}
+  void breathing_speed_default(void) {}
+  void breathing_speed_set(uint8_t value) {}
+  void breathing_speed_inc(uint8_t value) {}
+  void breathing_speed_dec(uint8_t value) {}
+  void breathing_defaults(void) {}
+#else
 
 #define BREATHING_NO_HALT  0
 #define BREATHING_HALT_OFF 1
@@ -1060,7 +1077,7 @@ ISR(TIMER1_COMPA_vect)
 
 }
 
-
+#endif // no clock
 
 #endif // breathing
 
