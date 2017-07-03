@@ -1,4 +1,4 @@
-AUDIO_ENABLE ?= no           # Audio output on port C6
+AUDIO_ENABLE = no           # Audio output on port C6
 
 # Boot Section Size in *bytes*
 #   Teensy halfKay   512
