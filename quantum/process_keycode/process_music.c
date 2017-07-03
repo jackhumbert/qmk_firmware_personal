@@ -132,8 +132,6 @@ bool process_music(uint16_t keycode, keyrecord_t *record) {
         return false;
       }
 
-      #define MUSIC_MODE_GUITAR
-
       #ifdef MUSIC_MODE_CHROMATIC
       uint8_t note = (music_starting_note + record->event.key.col + music_offset - 3)+12*(MATRIX_ROWS - record->event.key.row);
       #elif defined(MUSIC_MODE_GUITAR)

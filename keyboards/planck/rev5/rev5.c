@@ -117,10 +117,10 @@ uint16_t backlight_task_counter = 0;
 void matrix_scan_kb(void)
 {
 
-    if (backlight_task_counter == 0)
+    // if (backlight_task_counter == 0)
         backlight_rgb_task();
         // backlight_effect_single_LED_test();
-    backlight_task_counter = ((backlight_task_counter + 1) % 5);
+    // backlight_task_counter = ((backlight_task_counter + 1) % 5);
 
     // This only updates the LED driver buffers if something has changed.
     backlight_update_pwm_buffers();
@@ -143,4 +143,3 @@ void suspend_wakeup_init_kb(void)
 {
     backlight_set_suspend_state(false);
 }
-
