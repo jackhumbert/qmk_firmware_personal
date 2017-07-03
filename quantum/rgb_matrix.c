@@ -651,16 +651,6 @@ void backlight_rgb_task(void) {
 //  }
 // }
 
-void backlight_config_set_alphas_mods( uint16_t *alphas_mods )
-{
-    for ( int i=0; i<5; i++ )
-    {
-        g_config.alphas_mods[i] = alphas_mods[i];
-    }
-
-    backlight_config_save();
-}
-
 void backlight_config_load(void)
 {
     eeprom_read_block( &g_config, EEPROM_BACKLIGHT_CONFIG_ADDR, sizeof(rgb_matrix_config) );
