@@ -20,9 +20,12 @@
 #include <string.h>
 #include "TWIlib.h"
 #include "progmem.h"
-
+#include "is31fl3733.h"
 
 #define ISSI_COMMAND_REGISTER 0xFD
+#define ISSI_COMMAND_REGISTER_LOCK 0xFE
+	#define ISSI_COMMAND_REGISTER_WRITE_DISABLE 0x00
+	#define ISSI_COMMAND_REGISTER_WRITE_ONCE 0xC5
 
 #define ISSI_CONTROL_REGISTER 0x00 // LED Control Register
 // 0x00 - 0x17 set on/off state (w)
@@ -156,44 +159,43 @@ void IS31FL3733_init( uint8_t addr )
 	// then set up the mode and other settings, clear the PWM registers,
 	// then disable software shutdown.
 
+	// unlock command register
+	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER_LOCK, ISSI_COMMAND_REGISTER_WRITE_ONCE );
+
 	// select "configure register"
 	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER, ISSI_FUNCTION_REGISTER );
 
-	// enable software shutdown
+	// enable software shutdown (it should already be shutdown)
 	IS31FL3733_write_register( addr, ISSI_CONFIGURATION_REGISTER, ISSI_SSD_MODE );
 
 	// this delay was copied from other drivers, might not be needed
 	_delay_ms( 10 );
 
 	// select bank 0
-	IS31FL3733_write_register( addr, ISSI_COMMANDREGISTER, 0 );
+	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER, ISSI_CONTROL_REGISTER );
 
 	// turn off all LEDs in the LED control register
-	for ( int i = 0x00; i <= 0x11; i++ )
-	{
-		IS31FL3733_write_register( addr, i, 0x00 );
-	}
-
-	// turn off all LEDs in the blink control register (not really needed)
-	for ( int i = 0x12; i <= 0x23; i++ )
-	{
-		IS31FL3733_write_register( addr, i, 0x00 );
-	}
-
-	// set PWM on all LEDs to 0
-	for ( int i = 0x24; i <= 0xB3; i++ )
+	for ( int i = 0x00; i <= 0x17; i++ )
 	{
 		IS31FL3733_write_register( addr, i, 0x00 );
 	}
 
 	// select "function register" bank
-	IS31FL3733_write_register( addr, ISSI_COMMANDREGISTER, ISSI_BANK_FUNCTIONREG );
+	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER, ISSI_PWM_REGISTER );
 
-	// disable software shutdown
-	IS31FL3733_write_register( addr, ISSI_REG_SHUTDOWN, 0x01 );
+	for ( int i = 0x00; i <= 0xBF; i++ )
+	{
+		IS31FL3733_write_register( addr, i, 0x00 );
+	}
+
+	// select "configure register"
+	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER, ISSI_FUNCTION_REGISTER );
+
+	// disable software shutdown, turn on pwm mode
+	IS31FL3733_write_register( addr, ISSI_CONFIGURATION_REGISTER, ISSI_NORMAL_OP | ISSI_PWM_MODE );
 
 	// select bank 0 and leave it selected.
 	// most usage after initialization is just writing PWM buffers in bank 0
 	// as there's not much point in double-buffering
-	IS31FL3733_write_register( addr, ISSI_COMMANDREGISTER, 0 );
+	IS31FL3733_write_register( addr, ISSI_COMMAND_REGISTER, ISSI_PWM_REGISTER );
 }
