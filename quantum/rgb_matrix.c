@@ -26,7 +26,7 @@
 #include "eeprom.h"
 #include "lufa.h"
 
-#define BACKLIGHT_EFFECT_MAX 10
+#define BACKLIGHT_EFFECT_MAX 11
 
 rgb_matrix_config g_config = {
 	.enabled = 1,
@@ -53,7 +53,9 @@ uint8_t g_key_hit[DRIVER_LED_TOTAL];
 uint32_t g_any_key_hit = 0;
 
 // Last led hit
-uint8_t g_last_led_hit = 0;
+#define LED_HITS_TO_REMEMBER 2
+uint8_t g_last_led_hit[LED_HITS_TO_REMEMBER] = {255};
+uint8_t g_last_led_count = 0;
 
 
 void map_row_column_to_led( uint8_t row, uint8_t column, uint8_t *led_i, uint8_t *led_count)
@@ -94,9 +96,13 @@ void backlight_set_key_hit(uint8_t row, uint8_t column)
     map_row_column_to_led(row,column,led,&led_count);
     for(uint8_t i = 0; i < led_count; i++)
         g_key_hit[led[i]] = 0;
-    if (led_count > 0)
-        g_last_led_hit = led[0];
-
+    if (led_count > 0) {
+        for (uint8_t i = LED_HITS_TO_REMEMBER; i > 1; i--) {
+            g_last_led_hit[i - 1] = g_last_led_hit[i - 2];
+        }
+        g_last_led_hit[0] = led[0];
+        g_last_led_count = MIN(LED_HITS_TO_REMEMBER, g_last_led_count + 1);
+    }
     g_any_key_hit = 0;
 }
 
@@ -459,16 +465,43 @@ void backlight_effect_jellybean_raindrops( bool initialize )
     }
 }
 
+
 void backlight_effect_splash(void) {
     if (g_any_key_hit < 0x7F) {    
         HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
         RGB rgb;
         is31_led led;
-        is31_led last_led = g_is31_leds[g_last_led_hit];
+        is31_led last_led = g_is31_leds[g_last_led_hit[0]];
         for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
             led = g_is31_leds[i];
-            hsv.h = g_config.color_1.h + MIN((g_any_key_hit << 2) - (uint8_t)(sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2))), 256);
-            hsv.v = 256 - MIN((g_any_key_hit << 2) - (uint8_t)(sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2))), 256);
+            hsv.h = g_config.color_1.h + MIN((g_any_key_hit << 2) - (uint8_t)(sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2))), 255);
+            hsv.v = 255 - MIN((g_any_key_hit << 2) - (uint8_t)(sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2))), 255);
+            rgb = hsv_to_rgb( hsv );
+            backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+        }
+    } else {
+        backlight_set_color_all( 0, 0, 0 );
+    }
+}
+
+
+void backlight_effect_multisplash(void) {
+    if (g_any_key_hit < 0x7F) {    
+        HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+        RGB rgb;
+        is31_led led;
+        for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+            led = g_is31_leds[i];
+            uint8_t h = 0, v = 0;
+            is31_led last_led;
+            for (uint8_t last_i = 0; last_i < g_last_led_count; last_i++) {
+                last_led = g_is31_leds[g_last_led_hit[last_i]];
+                uint8_t dist = MIN((uint8_t)sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2)), 255);
+                h += MIN((g_key_hit[g_last_led_hit[last_i]] << 2) - dist, 255) / g_last_led_count;
+                v += (255 - MIN((g_key_hit[g_last_led_hit[last_i]] << 2) - dist, 255)) / g_last_led_count;
+            }
+            hsv.h = g_config.color_1.h + h;
+            hsv.v = v;
             rgb = hsv_to_rgb( hsv );
             backlight_set_color( i, rgb.r, rgb.g, rgb.b );
         }
@@ -589,6 +622,8 @@ void backlight_rgb_task(void) {
     {
         if ( g_key_hit[led] < 255 )
         {
+            if (g_key_hit[led] == 254)
+                g_last_led_count = MAX(g_last_led_count - 1, 0);
             g_key_hit[led]++;
         }
     }
@@ -649,6 +684,9 @@ void backlight_rgb_task(void) {
             backlight_effect_splash();
             break;
         case 10:
+            backlight_effect_multisplash();
+            break;
+        case 11:
         default:
             backlight_effect_custom();
             break;
