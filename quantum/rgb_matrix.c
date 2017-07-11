@@ -26,7 +26,7 @@
 #include "eeprom.h"
 #include "lufa.h"
 
-#define BACKLIGHT_EFFECT_MAX 11
+#define BACKLIGHT_EFFECT_MAX 13
 
 rgb_matrix_config g_config = {
 	.enabled = 1,
@@ -501,6 +501,41 @@ void backlight_effect_splash(void) {
     backlight_effect_multisplash();
 }
 
+
+void backlight_effect_solid_multisplash(void) {
+    // if (g_any_key_hit < 0xFF) {    
+        HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+        RGB rgb;
+        is31_led led;
+        for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+            led = g_is31_leds[i];
+            uint16_t d = 0;
+            is31_led last_led;
+            // if (g_last_led_count) {
+                for (uint8_t last_i = 0; last_i < g_last_led_count; last_i++) {
+                    last_led = g_is31_leds[g_last_led_hit[last_i]];
+                    uint16_t dist = (uint16_t)sqrt(pow(led.point.x - last_led.point.x, 2) + pow(led.point.y - last_led.point.y, 2));
+                    uint16_t effect = (g_key_hit[g_last_led_hit[last_i]] << 2) - dist;
+                    d += 255 - MIN(MAX(effect, 0), 255);
+                }
+            // } else {
+            //     d = 255;
+            // }
+            hsv.v = MAX(MIN(d, 255), 0);
+            rgb = hsv_to_rgb( hsv );
+            backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+        }
+    // } else {
+        // backlight_set_color_all( 0, 0, 0 );
+    // }
+}
+
+
+void backlight_effect_solid_splash(void) {
+    g_last_led_count = MIN(g_last_led_count, 1);   
+    backlight_effect_solid_multisplash();
+}
+
 void backlight_effect_custom(void)
 {
     HSV hsv;
@@ -677,6 +712,12 @@ void backlight_rgb_task(void) {
             backlight_effect_multisplash();
             break;
         case 11:
+            backlight_effect_solid_splash();
+            break;
+        case 12:
+            backlight_effect_solid_multisplash();
+            break;
+        case 13:
         default:
             backlight_effect_custom();
             break;
