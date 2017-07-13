@@ -25,8 +25,9 @@
 #include "config.h"
 #include "eeprom.h"
 #include "lufa.h"
+#include <math.h>
 
-#define BACKLIGHT_EFFECT_MAX 13
+#define BACKLIGHT_EFFECT_MAX 14
 
 rgb_matrix_config g_config = {
 	.enabled = 1,
@@ -51,6 +52,10 @@ uint8_t g_key_hit[DRIVER_LED_TOTAL];
 
 // Ticks since any key was last hit.
 uint32_t g_any_key_hit = 0;
+
+#ifndef PI
+#define PI 3.14159265
+#endif
 
 // Last led hit
 #define LED_HITS_TO_REMEMBER 8
@@ -440,6 +445,18 @@ void backlight_effect_cycle_up_down(void)
     }
 }
 
+void backlight_effect_rainbow_beacon(void) {
+    HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+    RGB rgb;
+    is31_led led;
+    for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+        led = g_is31_leds[i];
+        hsv.h = 1.5 * (led.point.y - 32.0)* cos(g_tick * PI / 128) + 1.5 * (led.point.x - 112.0) * sin(g_tick * PI / 128) + g_config.color_1.h;
+        rgb = hsv_to_rgb( hsv );
+        backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+    }
+}
+
 void backlight_effect_jellybean_raindrops( bool initialize )
 {
     HSV hsv;
@@ -703,21 +720,24 @@ void backlight_rgb_task(void) {
             backlight_effect_cycle_up_down();
             break;
         case 8:
-            backlight_effect_jellybean_raindrops( initialize );
+            backlight_effect_rainbow_beacon();
             break;
         case 9:
-            backlight_effect_splash();
+            backlight_effect_jellybean_raindrops( initialize );
             break;
         case 10:
-            backlight_effect_multisplash();
+            backlight_effect_splash();
             break;
         case 11:
-            backlight_effect_solid_splash();
+            backlight_effect_multisplash();
             break;
         case 12:
-            backlight_effect_solid_multisplash();
+            backlight_effect_solid_splash();
             break;
         case 13:
+            backlight_effect_solid_multisplash();
+            break;
+        case 14:
         default:
             backlight_effect_custom();
             break;
