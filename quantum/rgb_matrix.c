@@ -27,12 +27,12 @@
 #include "lufa.h"
 #include <math.h>
 
-#define BACKLIGHT_EFFECT_MAX 14
+#define BACKLIGHT_EFFECT_MAX 15
 
 rgb_matrix_config g_config = {
 	.enabled = 1,
     .brightness = 255,
-    .effect = 6,
+    .effect = 8,
     .color_1 = { .h = 130, .s = 255, .v = 255 },
     .color_2 = { .h = 70, .s = 255, .v = 255 },
     .caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
@@ -457,6 +457,20 @@ void backlight_effect_rainbow_beacon(void) {
     }
 }
 
+void backlight_effect_rainbow_moving_chevron(void) {
+    HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+    RGB rgb;
+    is31_led led;
+    for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+        led = g_is31_leds[i];
+        // uint8_t r = g_tick;
+        uint8_t r = 32;
+        hsv.h = 1.5 * abs(led.point.y - 32.0)* sin(r * PI / 128) + 1.5 * (led.point.x - (g_tick / 256.0 * 224)) * cos(r * PI / 128) + g_config.color_1.h;
+        rgb = hsv_to_rgb( hsv );
+        backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+    }
+}
+
 void backlight_effect_jellybean_raindrops( bool initialize )
 {
     HSV hsv;
@@ -723,21 +737,24 @@ void backlight_rgb_task(void) {
             backlight_effect_rainbow_beacon();
             break;
         case 9:
-            backlight_effect_jellybean_raindrops( initialize );
+            backlight_effect_rainbow_moving_chevron();
             break;
         case 10:
-            backlight_effect_splash();
+            backlight_effect_jellybean_raindrops( initialize );
             break;
         case 11:
-            backlight_effect_multisplash();
+            backlight_effect_splash();
             break;
         case 12:
-            backlight_effect_solid_splash();
+            backlight_effect_multisplash();
             break;
         case 13:
-            backlight_effect_solid_multisplash();
+            backlight_effect_solid_splash();
             break;
         case 14:
+            backlight_effect_solid_multisplash();
+            break;
+        case 15:
         default:
             backlight_effect_custom();
             break;
