@@ -27,12 +27,12 @@
 #include "lufa.h"
 #include <math.h>
 
-#define BACKLIGHT_EFFECT_MAX 15
+#define BACKLIGHT_EFFECT_MAX 17
 
 rgb_matrix_config g_config = {
 	.enabled = 1,
     .brightness = 255,
-    .effect = 8,
+    .effect = 9,
     .color_1 = { .h = 130, .s = 255, .v = 255 },
     .color_2 = { .h = 70, .s = 255, .v = 255 },
     .caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
@@ -445,6 +445,19 @@ void backlight_effect_cycle_up_down(void)
     }
 }
 
+
+void backlight_effect_dual_beacon(void) {
+    HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+    RGB rgb;
+    is31_led led;
+    for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+        led = g_is31_leds[i];
+        hsv.h = ((led.point.y - 32.0)* cos(g_tick * PI / 128) / 32 + (led.point.x - 112.0) * sin(g_tick * PI / 128) / (112)) * (g_config.color_2.h - g_config.color_1.h) + g_config.color_1.h;
+        rgb = hsv_to_rgb( hsv );
+        backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+    }
+}
+
 void backlight_effect_rainbow_beacon(void) {
     HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
     RGB rgb;
@@ -452,6 +465,18 @@ void backlight_effect_rainbow_beacon(void) {
     for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
         led = g_is31_leds[i];
         hsv.h = 1.5 * (led.point.y - 32.0)* cos(g_tick * PI / 128) + 1.5 * (led.point.x - 112.0) * sin(g_tick * PI / 128) + g_config.color_1.h;
+        rgb = hsv_to_rgb( hsv );
+        backlight_set_color( i, rgb.r, rgb.g, rgb.b );
+    }
+}
+
+void backlight_effect_rainbow_pinwheels(void) {
+    HSV hsv = { .h = g_config.color_1.h, .s = g_config.color_1.s, .v = g_config.brightness };
+    RGB rgb;
+    is31_led led;
+    for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++) {
+        led = g_is31_leds[i];
+        hsv.h = 2 * (led.point.y - 32.0)* cos(g_tick * PI / 128) + 2 * (66 - abs(led.point.x - 112.0)) * sin(g_tick * PI / 128) + g_config.color_1.h;
         rgb = hsv_to_rgb( hsv );
         backlight_set_color( i, rgb.r, rgb.g, rgb.b );
     }
@@ -470,6 +495,7 @@ void backlight_effect_rainbow_moving_chevron(void) {
         backlight_set_color( i, rgb.r, rgb.g, rgb.b );
     }
 }
+
 
 void backlight_effect_jellybean_raindrops( bool initialize )
 {
@@ -719,42 +745,48 @@ void backlight_rgb_task(void) {
             backlight_effect_alphas_mods();
             break;
         case 3:
-            backlight_effect_gradient_up_down();
+            backlight_effect_dual_beacon();
             break;
         case 4:
-            backlight_effect_raindrops( initialize );
+            backlight_effect_gradient_up_down();
             break;
         case 5:
-            backlight_effect_cycle_all();
+            backlight_effect_raindrops( initialize );
             break;
         case 6:
-            backlight_effect_cycle_left_right();
+            backlight_effect_cycle_all();
             break;
         case 7:
-            backlight_effect_cycle_up_down();
+            backlight_effect_cycle_left_right();
             break;
         case 8:
-            backlight_effect_rainbow_beacon();
+            backlight_effect_cycle_up_down();
             break;
         case 9:
-            backlight_effect_rainbow_moving_chevron();
+            backlight_effect_rainbow_beacon();
             break;
         case 10:
-            backlight_effect_jellybean_raindrops( initialize );
+            backlight_effect_rainbow_pinwheels();
             break;
         case 11:
-            backlight_effect_splash();
+            backlight_effect_rainbow_moving_chevron();
             break;
         case 12:
-            backlight_effect_multisplash();
+            backlight_effect_jellybean_raindrops( initialize );
             break;
         case 13:
-            backlight_effect_solid_splash();
+            backlight_effect_splash();
             break;
         case 14:
-            backlight_effect_solid_multisplash();
+            backlight_effect_multisplash();
             break;
         case 15:
+            backlight_effect_solid_splash();
+            break;
+        case 16:
+            backlight_effect_solid_multisplash();
+            break;
+        case 17:
         default:
             backlight_effect_custom();
             break;
