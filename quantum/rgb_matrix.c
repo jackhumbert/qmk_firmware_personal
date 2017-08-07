@@ -260,7 +260,7 @@ void backlight_effect_solid_reactive(void)
 	for ( int i=0; i<DRIVER_LED_TOTAL; i++ )
 	{
 		uint16_t offset2 = g_key_hit[i]<<2;
-		offset2 = (offset2<=63) ? (63-offset2) : 0;
+		offset2 = (offset2<=130) ? (130-offset2) : 0;
 
 		HSV hsv = { .h = g_config.color_1.h+offset2, .s = 255, .v = g_config.brightness };
 		RGB rgb = hsv_to_rgb( hsv );
