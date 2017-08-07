@@ -32,7 +32,7 @@
 rgb_matrix_config g_config = {
 	.enabled = 1,
     .brightness = 255,
-    .effect = 9,
+    .effect = 7,
     .color_1 = { .h = 130, .s = 255, .v = 255 },
     .color_2 = { .h = 70, .s = 255, .v = 255 },
     .caps_lock_indicator = { .color = { .h = 0, .s = 0, .v = 255 }, .index = 255 },
