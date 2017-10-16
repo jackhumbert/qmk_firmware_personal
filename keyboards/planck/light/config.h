@@ -1,9 +1,13 @@
-#ifndef REV5_CONFIG_H
-#define REV5_CONFIG_H
+#ifndef LIGHT_CONFIG_H
+#define LIGHT_CONFIG_H
 
 #include "config_common.h"
 
-#define DEVICE_VER 0x0005
+#undef PRODUCT
+#define PRODUCT Planck Light
+#undef PRODUCT_ID
+#define PRODUCT_ID 0x6065
+#define DEVICE_VER 0x0001
 
 #undef MATRIX_ROW_PINS
 #undef MATRIX_COL_PINS

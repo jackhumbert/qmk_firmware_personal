@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rev5.h"
+#include "light.h"
 
 const is31_led g_is31_leds[DRIVER_LED_TOTAL] = {
 /*   driver
