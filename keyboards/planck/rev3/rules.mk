@@ -1,4 +1,3 @@
-AUDIO_ENABLE = no           # Audio output on port C6
 
 # Boot Section Size in *bytes*
 #   Teensy halfKay   512
@@ -8,6 +7,4 @@ AUDIO_ENABLE = no           # Audio output on port C6
 #   USBaspLoader     2048
 OPT_DEFS += -DBOOTLOADER_SIZE=4096
 
-ifndef QUANTUM_DIR
-	include ../../../Makefile
-endif
+AUDIO_ENABLE = no           # Audio output on port C6
