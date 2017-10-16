@@ -116,5 +116,7 @@ void rgblight_increase_sat(void);
 void rgblight_decrease_sat(void);
 void rgblight_increase_val(void);
 void rgblight_decrease_val(void);
+void rgblight_mode(uint8_t mode);
+uint32_t rgblight_get_mode(void);
 
 #endif

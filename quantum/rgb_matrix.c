@@ -1008,41 +1008,49 @@ void backlight_debug_led( bool state )
 void rgblight_toggle(void) {
 	g_config.enabled ^= 1;
     backlight_config_save();
-};
+}
 
 void rgblight_step(void) {
     g_config.effect = (g_config.effect + 1) % (BACKLIGHT_EFFECT_MAX + 1);
     backlight_config_save();
-};
+}
 
 void rgblight_increase_hue(void) {
 	backlight_color_1_hue_increase();
 	backlight_color_2_hue_increase();
-};
+}
 
 void rgblight_decrease_hue(void) {
 	backlight_color_1_hue_decrease();
 	backlight_color_2_hue_decrease();
-};
+}
 
 void rgblight_increase_sat(void) {
 	backlight_color_1_sat_increase();
 	backlight_color_2_sat_increase();
-};
+}
 
 void rgblight_decrease_sat(void) {
 	backlight_color_1_sat_decrease();
 	backlight_color_2_sat_decrease();
-};
+}
 
 void rgblight_increase_val(void) {
     g_config.color_1.v = increment( g_config.color_1.s, 8, 0, 255 );
     g_config.color_2.v = increment( g_config.color_1.s, 8, 0, 255 );
     backlight_config_save();
-};
+}
 
 void rgblight_decrease_val(void) {
     g_config.color_1.v = decrement( g_config.color_1.s, 8, 0, 255 );
     g_config.color_2.v = decrement( g_config.color_1.s, 8, 0, 255 );
     backlight_config_save();
-};
+}
+
+void rgblight_mode(uint8_t mode) {
+    g_config.effect = mode;
+}
+
+uint32_t rgblight_get_mode(void) {
+    return g_config.effect;
+}

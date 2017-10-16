@@ -18,7 +18,7 @@
 #ifndef REV5_H
 #define REV5_H
 
-#include "../planck.h"
+#include "planck.h"
 #include "rgb_matrix.h"
 
 #endif
